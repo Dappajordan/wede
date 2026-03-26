@@ -1,0 +1,59 @@
+import { useState, useCallback } from 'react'
+
+const API = '/api'
+
+export function useAuth() {
+  const [token, setToken] = useState(() => sessionStorage.getItem('wede_token'))
+  const [error, setError] = useState(null)
+  const [locked, setLocked] = useState(false)
+  const [remaining, setRemaining] = useState(3)
+
+  const login = useCallback(async (password) => {
+    setError(null)
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      const data = await res.json()
+      if (data.error === 'locked') {
+        setLocked(true)
+        setError(data.message)
+        return false
+      }
+      if (data.error === 'wrong_password') {
+        setRemaining(data.remaining)
+        setError(`Wrong password. ${data.remaining} attempt${data.remaining !== 1 ? 's' : ''} remaining.`)
+        return false
+      }
+      if (data.token) {
+        sessionStorage.setItem('wede_token', data.token)
+        setToken(data.token)
+        return true
+      }
+      setError('Unknown error')
+      return false
+    } catch {
+      setError('Cannot connect to server')
+      return false
+    }
+  }, [])
+
+  const logout = useCallback(() => {
+    sessionStorage.removeItem('wede_token')
+    setToken(null)
+  }, [])
+
+  const authFetch = useCallback(async (url, options = {}) => {
+    const headers = { ...options.headers, Authorization: token }
+    const res = await fetch(url, { ...options, headers })
+    if (res.status === 401) {
+      logout()
+      throw new Error('unauthorized')
+    }
+    return res
+  }, [token, logout])
+
+  return { token, login, logout, error, locked, remaining, authFetch }
+}

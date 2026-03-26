@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "@xterm/xterm/css/xterm.css";
+
+/* ── Theme Variables ── */
+:root {
+  --c-bg-primary: #111827;
+  --c-bg-secondary: #0f172a;
+  --c-bg-tertiary: #0a0f1a;
+  --c-bg-hover: #1e293b;
+  --c-bg-active: #334155;
+  --c-bg-input: #0f172a;
+  --c-border: #1e293b;
+  --c-border-active: #334155;
+  --c-text-primary: #f1f5f9;
+  --c-text-secondary: #94a3b8;
+  --c-text-muted: #64748b;
+  --c-accent: #60a5fa;
+  --c-accent-hover: #93c5fd;
+  --c-accent-glow: rgba(96, 165, 250, 0.15);
+  --c-green: #34d399;
+  --c-red: #fb7185;
+  --c-yellow: #fbbf24;
+  --c-peach: #fb923c;
+  --c-mauve: #a78bfa;
+  --c-cyan: #22d3ee;
+  --c-status-bar: #1e40af;
+  --c-status-text: #f1f5f9;
+  --c-scrollbar: #334155;
+  --c-selection: rgba(96, 165, 250, 0.2);
+  --c-shadow: rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="light"] {
+  --c-bg-primary: #ffffff;
+  --c-bg-secondary: #f8fafc;
+  --c-bg-tertiary: #f1f5f9;
+  --c-bg-hover: #e2e8f0;
+  --c-bg-active: #cbd5e1;
+  --c-bg-input: #f8fafc;
+  --c-border: #e2e8f0;
+  --c-border-active: #cbd5e1;
+  --c-text-primary: #0f172a;
+  --c-text-secondary: #475569;
+  --c-text-muted: #94a3b8;
+  --c-accent: #3b82f6;
+  --c-accent-hover: #2563eb;
+  --c-accent-glow: rgba(59, 130, 246, 0.1);
+  --c-green: #16a34a;
+  --c-red: #dc2626;
+  --c-yellow: #d97706;
+  --c-peach: #ea580c;
+  --c-mauve: #7c3aed;
+  --c-cyan: #0891b2;
+  --c-status-bar: #3b82f6;
+  --c-status-text: #ffffff;
+  --c-scrollbar: #cbd5e1;
+  --c-selection: rgba(59, 130, 246, 0.15);
+  --c-shadow: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Tailwind Theme Mapping ── */
+@theme {
+  --font-brand: 'Space Grotesk', 'Inter', sans-serif;
+  --color-bg-primary: var(--c-bg-primary);
+  --color-bg-secondary: var(--c-bg-secondary);
+  --color-bg-tertiary: var(--c-bg-tertiary);
+  --color-bg-hover: var(--c-bg-hover);
+  --color-bg-active: var(--c-bg-active);
+  --color-bg-input: var(--c-bg-input);
+  --color-border: var(--c-border);
+  --color-border-active: var(--c-border-active);
+  --color-text-primary: var(--c-text-primary);
+  --color-text-secondary: var(--c-text-secondary);
+  --color-text-muted: var(--c-text-muted);
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-glow: var(--c-accent-glow);
+  --color-green: var(--c-green);
+  --color-red: var(--c-red);
+  --color-yellow: var(--c-yellow);
+  --color-peach: var(--c-peach);
+  --color-mauve: var(--c-mauve);
+  --color-cyan: var(--c-cyan);
+  --color-status-bar: var(--c-status-bar);
+  --color-status-text: var(--c-status-text);
+  --color-shadow: var(--c-shadow);
+}
+
+/* ── Global Styles ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-scrollbar) transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg-primary);
+  color: var(--c-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--c-selection);
+}
+
+/* ── CodeMirror Theme ── */
+.cm-editor {
+  height: 100%;
+  font-size: 14px;
+}
+
+.cm-editor .cm-scroller {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', monospace;
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+.cm-editor .cm-gutters {
+  background: var(--c-bg-secondary);
+  border-right: 1px solid var(--c-border);
+  color: var(--c-text-muted);
+}
+
+.cm-editor .cm-activeLineGutter {
+  background: var(--c-bg-primary);
+  color: var(--c-text-primary);
+}
+
+.cm-editor .cm-activeLine {
+  background: var(--c-accent-glow);
+}
+
+.cm-editor .cm-selectionBackground {
+  background: var(--c-selection) !important;
+}
+
+.cm-editor .cm-cursor {
+  border-left-color: var(--c-accent);
+}
+
+.cm-editor .cm-matchingBracket {
+  background: var(--c-accent-glow);
+  outline: 1px solid var(--c-accent);
+}
+
+/* ── xterm override ── */
+.xterm {
+  padding: 4px 8px;
+}
+
+.xterm-viewport {
+  background-color: var(--c-bg-tertiary) !important;
+}
+
+/* ── Mobile safe area ── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--c-accent-glow); }
+  50% { box-shadow: 0 0 12px 4px var(--c-accent-glow); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* ── Touch improvements ── */
+@media (pointer: coarse) {
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .compact-touch button, .compact-touch [role="button"] {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
