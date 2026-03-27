@@ -116,9 +116,9 @@ export default function TerminalToolbar({ onSend }) {
         </button>
         <button
           type="submit"
-          className="p-1.5 rounded bg-accent text-bg-primary active:opacity-80 shrink-0"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-bg-primary active:opacity-70 transition-opacity shrink-0 shadow-sm"
         >
-          <Send className="w-3.5 h-3.5" />
+          <Send className="w-4 h-4" />
         </button>
       </form>
 

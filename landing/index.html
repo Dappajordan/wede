@@ -8,21 +8,21 @@
 <meta name="keywords" content="web IDE, self-hosted IDE, online code editor, browser IDE, self-hosted code editor, remote development, terminal in browser, git client, VS Code alternative, open source IDE, Go web IDE, lightweight IDE, code server alternative, developer tools, self-hosted development environment, web terminal, PTY terminal, code editor dark mode, mobile code editor, single binary IDE">
 <meta name="author" content="wede">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://user.github.io/wede/">
+<link rel="canonical" href="https://wede.pty.it.com/">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="wede — Self-Hosted Web IDE">
 <meta property="og:description" content="A lightweight, open-source, self-hosted web IDE. Single binary. Code editor, terminal, git, and file explorer in your browser.">
-<meta property="og:image" content="https://user.github.io/wede/og-image.png">
-<meta property="og:url" content="https://user.github.io/wede/">
+<meta property="og:image" content="https://wede.pty.it.com/og-image.png">
+<meta property="og:url" content="https://wede.pty.it.com/">
 <meta property="og:site_name" content="wede">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="wede — Self-Hosted Web IDE">
 <meta name="twitter:description" content="A lightweight, open-source, self-hosted web IDE. Single binary. No cloud required.">
-<meta name="twitter:image" content="https://user.github.io/wede/og-image.png">
+<meta name="twitter:image" content="https://wede.pty.it.com/og-image.png">
 
 <link rel="icon" type="image/svg+xml" href="../public/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,9 +74,10 @@ nav .inner {
 }
 nav .logo { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.25rem; color: var(--text); }
 nav .logo img { width: 28px; height: 28px; }
-nav .links { display: flex; gap: 1.5rem; font-size: 0.9rem; }
-nav .links a { color: var(--text-muted); }
+nav .links { display: flex; align-items: center; gap: 1.5rem; font-size: 0.9rem; }
+nav .links a { color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem; }
 nav .links a:hover { color: var(--text); }
+nav .links a svg { width: 16px; height: 16px; }
 
 /* ---- Sections ---- */
 section { padding: 6rem 2rem; }
@@ -160,19 +161,8 @@ section { padding: 6rem 2rem; }
   transition: transform 0.2s;
 }
 .screenshot:hover { transform: translateY(-2px); }
-.screenshot-placeholder {
-  aspect-ratio: 16/10;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);
-  padding: 1rem; text-align: center;
-  background: repeating-linear-gradient(
-    135deg,
-    transparent, transparent 10px,
-    rgba(96,165,250,0.03) 10px, rgba(96,165,250,0.03) 20px
-  );
-}
+.screenshot img { width: 100%; display: block; }
 .screenshot.wide { grid-column: 1 / -1; }
-.screenshot.wide .screenshot-placeholder { aspect-ratio: 21/10; }
 .screenshot-label {
   padding: 0.6rem 1rem;
   font-size: 0.8rem; color: var(--text-muted);
@@ -221,9 +211,10 @@ footer {
   color: var(--text-muted);
   font-size: 0.85rem;
 }
-footer .footer-links { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
-footer .footer-links a { color: var(--text-muted); }
+footer .footer-links { display: flex; align-items: center; gap: 1.5rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+footer .footer-links a { color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.3rem; }
 footer .footer-links a:hover { color: var(--text); }
+footer .footer-links a svg { width: 14px; height: 14px; }
 footer .footer-brand { display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
 footer .footer-brand img { width: 20px; height: 20px; opacity: 0.6; }
 footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; opacity: 0.6; }
@@ -232,7 +223,6 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
 @media (max-width: 768px) {
   section { padding: 4rem 1.25rem; }
   .screenshots-grid { grid-template-columns: 1fr; }
-  .screenshot.wide .screenshot-placeholder { aspect-ratio: 16/10; }
   .dev-grid { grid-template-columns: 1fr; }
   nav .links { gap: 1rem; font-size: 0.82rem; }
   .install-section { padding: 2rem 1.25rem; }
@@ -260,7 +250,7 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS",
   "description": "A lightweight, open-source, self-hosted web IDE. Single Go binary with code editor, terminal, git integration, and file explorer accessible from any browser.",
-  "url": "https://user.github.io/wede/",
+  "url": "https://wede.pty.it.com/",
   "downloadUrl": "https://github.com/user/wede/releases",
   "softwareVersion": "1.0.0",
   "license": "https://opensource.org/licenses/MIT",
@@ -283,7 +273,7 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
       <a href="#screenshots">Screenshots</a>
       <a href="#install">Install</a>
       <a href="#development">Dev</a>
-      <a href="https://github.com/user/wede" target="_blank">GitHub</a>
+      <a href="https://github.com/user/wede" target="_blank"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     </div>
   </div>
 </nav>
@@ -296,7 +286,7 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
     <p class="tagline">An open-source code editor, terminal, and git client that runs in your browser. No cloud, no subscriptions. One binary on your server, NAS, or Raspberry Pi.</p>
     <div class="cta-group">
       <a href="#install" class="btn btn-primary">Install wede</a>
-      <a href="https://github.com/user/wede" class="btn btn-secondary" target="_blank">View on GitHub</a>
+      <a href="https://github.com/user/wede" class="btn btn-secondary" target="_blank"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     </div>
   </div>
 </section>
@@ -358,28 +348,24 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
     <p class="section-sub fade-in">A clean, focused interface designed for productivity.</p>
     <div class="screenshots-grid">
       <div class="screenshot wide fade-in">
-        <div class="screenshot-placeholder">[Full IDE Screenshot - Dark Mode]</div>
-        <div class="screenshot-label">Dark mode (Midnight theme)</div>
+        <img src="docs/screenshots/full_light.png" alt="wede web IDE light mode with code editor terminal and git">
+        <div class="screenshot-label">Full IDE — Light mode (Daylight theme)</div>
       </div>
       <div class="screenshot fade-in">
-        <div class="screenshot-placeholder">[Light Mode]</div>
-        <div class="screenshot-label">Light mode (Daylight theme)</div>
+        <img src="docs/screenshots/git.png" alt="wede git source control with staging and commits">
+        <div class="screenshot-label">Git source control</div>
       </div>
       <div class="screenshot fade-in">
-        <div class="screenshot-placeholder">[Terminal]</div>
-        <div class="screenshot-label">Multiple terminal tabs</div>
-      </div>
-      <div class="screenshot fade-in">
-        <div class="screenshot-placeholder">[Git Graph]</div>
+        <img src="docs/screenshots/git_graph.png" alt="wede visual git commit graph with branches">
         <div class="screenshot-label">Git commit graph</div>
       </div>
       <div class="screenshot fade-in">
-        <div class="screenshot-placeholder">[File Explorer]</div>
-        <div class="screenshot-label">File explorer with git status</div>
+        <img src="docs/screenshots/preview.png" alt="wede built-in browser preview">
+        <div class="screenshot-label">Built-in browser preview</div>
       </div>
-      <div class="screenshot wide fade-in">
-        <div class="screenshot-placeholder">[Mobile View]</div>
-        <div class="screenshot-label">Mobile responsive layout</div>
+      <div class="screenshot fade-in">
+        <img src="docs/screenshots/settings.png" alt="wede settings with dark and light themes">
+        <div class="screenshot-label">Settings &amp; themes</div>
       </div>
     </div>
   </div>
@@ -484,10 +470,10 @@ footer .footer-brand span { font-family: var(--font-heading); font-weight: 600; 
     <span>wede</span>
   </div>
   <div class="footer-links">
-    <a href="https://github.com/user/wede">GitHub</a>
-    <a href="https://github.com/user/wede/releases">Releases</a>
-    <a href="https://github.com/user/wede/issues">Issues</a>
-    <a href="https://github.com/user/wede/blob/main/LICENSE">License</a>
+    <a href="https://github.com/user/wede" target="_blank"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    <a href="https://github.com/user/wede/releases" target="_blank">Releases</a>
+    <a href="https://github.com/user/wede/issues" target="_blank">Issues</a>
+    <a href="https://github.com/user/wede/blob/main/LICENSE" target="_blank">License</a>
   </div>
   <p>wede is free, open-source software. Built with Go, React, and a love for simple developer tools.</p>
   <p style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.5;">self-hosted web IDE &middot; browser code editor &middot; remote development &middot; open source</p>

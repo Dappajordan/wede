@@ -48,7 +48,8 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          cp -r dist backend/cmd/wede/dist
+          mkdir -p backend/cmd/wede/dist
+          cp -r dist/* backend/cmd/wede/dist/
           cd backend
 
           VERSION="${GITHUB_REF_NAME}"

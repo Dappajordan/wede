@@ -15,16 +15,16 @@ Deploy on your server, NAS, Raspberry Pi, or run locally.
 [![License](https://img.shields.io/github/license/user/wede?style=flat-square)](LICENSE)
 [![Go](https://img.shields.io/badge/go-1.22+-00ADD8?style=flat-square&logo=go)](https://go.dev)
 
-[Website](https://user.github.io/wede/) · [Install](#quick-install) · [Screenshots](#screenshots) · [Docs](#getting-started)
+[Website](https://wede.pty.it.com/) · [Install](#quick-install) · [Screenshots](#screenshots) · [Docs](#getting-started)
 
 </div>
 
 <br>
 
 <div align="center">
-<img src="docs/screenshots/dark-full.png" alt="wede self-hosted web IDE running in browser with code editor, terminal, and git integration" width="800">
+<img src="docs/screenshots/full_light.png" alt="wede self-hosted web IDE running in browser with code editor, terminal, and git integration" width="800">
 <br>
-<em>wede — browser-based IDE with dark mode (Midnight theme)</em>
+<em>wede — browser-based IDE with light mode (Daylight theme)</em>
 </div>
 
 <br>
@@ -46,16 +46,8 @@ Deploy on your server, NAS, Raspberry Pi, or run locally.
 
 <table>
 <tr>
-<td><img src="docs/screenshots/dark-full.png" alt="wede web IDE dark mode with code editor terminal and git" width="400"><br><em>Dark mode (Midnight)</em></td>
-<td><img src="docs/screenshots/light-full.png" alt="wede web IDE light mode theme" width="400"><br><em>Light mode (Daylight)</em></td>
-</tr>
-<tr>
-<td><img src="docs/screenshots/terminal.png" alt="wede browser terminal emulator with multiple tabs" width="400"><br><em>Web terminal with multiple tabs</em></td>
-<td><img src="docs/screenshots/git-graph.png" alt="wede visual git commit graph with branches" width="400"><br><em>Visual git commit graph</em></td>
-</tr>
-<tr>
-<td><img src="docs/screenshots/file-explorer.png" alt="wede file explorer with git status colors like VS Code" width="400"><br><em>File explorer with git status</em></td>
-<td><img src="docs/screenshots/mobile.png" alt="wede mobile responsive IDE on phone and tablet" width="400"><br><em>Mobile responsive layout</em></td>
+<td><img src="docs/screenshots/git_graph.png" alt="wede visual git commit graph" width="400"><br><em>Git commit graph</em></td>
+<td><img src="docs/screenshots/preview.png" alt="wede built-in browser preview" width="400"><br><em>Built-in browser preview</em></td>
 </tr>
 </table>
 
@@ -175,6 +167,10 @@ Contributions are welcome! Please:
 4. Push to the branch (`git push origin feature/my-feature`)
 5. Open a pull request
 
+## Author
+
+Vibe coded by <a href="https://github.com/imranparuk"><img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="14" height="14" alt="GitHub"> <strong>imranparuk</strong></a>
+
 ## License
 
 [MIT](LICENSE)
@@ -183,7 +179,7 @@ Contributions are welcome! Please:
 
 <div align="center">
 
-<a href="https://user.github.io/wede">Website</a> · <a href="https://github.com/user/wede/issues">Issues</a> · <a href="https://github.com/user/wede/releases">Releases</a>
+<a href="https://wede.pty.it.com">Website</a> · <a href="https://github.com/user/wede/issues">Issues</a> · <a href="https://github.com/user/wede/releases">Releases</a>
 
 <br>
 
