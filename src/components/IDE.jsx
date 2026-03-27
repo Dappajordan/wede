@@ -22,8 +22,13 @@ export default function IDE({ token, authFetch, onLogout, workspace, recents, on
   const isMobile = useMobile()
   const { isDark, toggle: toggleTheme } = useTheme()
 
-  const [tabs, setTabs] = useState([])
-  const [activeTab, setActiveTab] = useState(null)
+  const [tabs, setTabs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wede_tabs')
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('wede_activeTab') || null)
 
   const [showSidebar, setShowSidebar] = useState(true)
   const [sidebarTab, setSidebarTab] = useState('files')
@@ -31,7 +36,7 @@ export default function IDE({ token, authFetch, onLogout, workspace, recents, on
   const [showTerminal, setShowTerminal] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
 
-  const [mobilePanel, setMobilePanel] = useState('code')
+  const [mobilePanel, setMobilePanel] = useState('files')
   const [mobileMenu, setMobileMenu] = useState(false)
   const [termFullscreen, setTermFullscreen] = useState(false)
 
@@ -50,6 +55,40 @@ export default function IDE({ token, authFetch, onLogout, workspace, recents, on
 
   const resizingRef = useRef(null)
   const folderName = workspace?.split('/').pop() || 'wede'
+
+  // Persist open tabs to localStorage
+  useEffect(() => {
+    try {
+      // Save tab metadata (path, name, type) but not content — content is re-fetched
+      const toSave = tabs.map(t => ({ path: t.path, name: t.name, type: t.type, url: t.url }))
+      localStorage.setItem('wede_tabs', JSON.stringify(toSave))
+    } catch {}
+  }, [tabs])
+
+  useEffect(() => {
+    if (activeTab) localStorage.setItem('wede_activeTab', activeTab)
+    else localStorage.removeItem('wede_activeTab')
+  }, [activeTab])
+
+  // Re-fetch content for restored tabs on mount
+  useEffect(() => {
+    if (tabs.length === 0) return
+    const needsContent = tabs.filter(t => t.type !== 'browser' && t.content === undefined)
+    if (needsContent.length === 0) return
+    Promise.all(needsContent.map(async (t) => {
+      try {
+        const res = await authFetch(`/api/files/read?path=${encodeURIComponent(t.path)}`)
+        const data = await res.json()
+        return { path: t.path, content: data.content }
+      } catch { return { path: t.path, content: '' } }
+    })).then(results => {
+      setTabs(prev => prev.map(t => {
+        const r = results.find(r => r.path === t.path)
+        if (r) return { ...t, content: r.content, originalContent: r.content, modified: false }
+        return t
+      }))
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch git branch + change count
   useEffect(() => {
@@ -294,12 +333,10 @@ export default function IDE({ token, authFetch, onLogout, workspace, recents, on
               <div className="flex-1 min-h-0">{renderTabContent()}</div>
             </div>
           )}
-          {mobilePanel === 'terminal' && (
-            <div className="h-full animate-fade-in">
-              <TerminalPanel key={terminalKey} token={token} visible
-                isFullscreen={termFullscreen} onToggleFullscreen={() => setTermFullscreen(!termFullscreen)} isMobile />
-            </div>
-          )}
+          <div className="absolute inset-0 z-10" style={{ display: mobilePanel === 'terminal' ? 'block' : 'none' }}>
+            <TerminalPanel key={terminalKey} token={token} authFetch={authFetch} visible={mobilePanel === 'terminal'}
+              isFullscreen={termFullscreen} onToggleFullscreen={() => setTermFullscreen(!termFullscreen)} isMobile />
+          </div>
           {mobilePanel === 'git' && (
             <div className="h-full animate-fade-in"><GitPanel authFetch={authFetch} visible isMobile /></div>
           )}
@@ -412,7 +449,7 @@ export default function IDE({ token, authFetch, onLogout, workspace, recents, on
               <div className="h-1 cursor-row-resize hover:bg-accent/30 active:bg-accent/50 transition-colors border-t border-border"
                 onMouseDown={handleMouseDown('terminal')} />
               <div style={{ height: terminalHeight }} className="shrink-0">
-                <TerminalPanel key={terminalKey} token={token} visible={showTerminal} />
+                <TerminalPanel key={terminalKey} token={token} authFetch={authFetch} visible={showTerminal} />
               </div>
             </>
           )}

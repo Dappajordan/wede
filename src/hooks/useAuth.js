@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react'
 const API = '/api'
 
 export function useAuth() {
-  const [token, setToken] = useState(() => sessionStorage.getItem('wede_token'))
+  const [token, setToken] = useState(() => localStorage.getItem('wede_token'))
   const [error, setError] = useState(null)
   const [locked, setLocked] = useState(false)
   const [remaining, setRemaining] = useState(3)
@@ -28,7 +28,7 @@ export function useAuth() {
         return false
       }
       if (data.token) {
-        sessionStorage.setItem('wede_token', data.token)
+        localStorage.setItem('wede_token', data.token)
         setToken(data.token)
         return true
       }
@@ -41,7 +41,7 @@ export function useAuth() {
   }, [])
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem('wede_token')
+    localStorage.removeItem('wede_token')
     setToken(null)
   }, [])
 

@@ -1,14 +1,82 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Plus, X, TerminalSquare, Maximize2, Minimize2 } from 'lucide-react'
 import Terminal from './Terminal'
 import { useTheme } from '../hooks/useTheme'
 
-let nextId = 1
+function loadTerminals() {
+  try {
+    const saved = localStorage.getItem('wede_terminals')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {}
+  return null
+}
 
-export default function TerminalPanel({ token, visible, isFullscreen, onToggleFullscreen, isMobile }) {
+function saveTerminals(terminals, activeId) {
+  try {
+    localStorage.setItem('wede_terminals', JSON.stringify(terminals))
+    localStorage.setItem('wede_terminal_active', String(activeId))
+  } catch {}
+}
+
+let nextId = (() => {
+  const saved = loadTerminals()
+  if (saved) return Math.max(...saved.map(t => t.id)) + 1
+  return 1
+})()
+
+export default function TerminalPanel({ token, authFetch, visible, isFullscreen, onToggleFullscreen, isMobile }) {
   const { terminalTheme } = useTheme()
-  const [terminals, setTerminals] = useState(() => [{ id: nextId++, name: 'Terminal 1' }])
-  const [activeId, setActiveId] = useState(1)
+  const [terminals, setTerminals] = useState(() => {
+    const saved = loadTerminals()
+    return saved || [{ id: nextId++, name: 'Terminal 1' }]
+  })
+  const [activeId, setActiveId] = useState(() => {
+    const saved = localStorage.getItem('wede_terminal_active')
+    return saved ? Number(saved) : terminals[0]?.id || 1
+  })
+  const reconciledRef = useRef(false)
+
+  // On mount, check which sessions are still alive on the server and reconcile
+  useEffect(() => {
+    if (reconciledRef.current || !authFetch) return
+    reconciledRef.current = true
+
+    authFetch('/api/terminal/sessions')
+      .then(res => res.json())
+      .then(data => {
+        const serverSessions = new Set(data.sessions || [])
+        if (serverSessions.size === 0) return // no server sessions, keep local tabs (they'll create new sessions)
+
+        setTerminals(prev => {
+          // Check if any saved terminals have living server sessions
+          const alive = prev.filter(t => serverSessions.has(`term-${t.id}`))
+          // Also check for server sessions we don't have tabs for
+          const knownIds = new Set(prev.map(t => `term-${t.id}`))
+          const orphans = [...serverSessions]
+            .filter(s => s.startsWith('term-') && !knownIds.has(s))
+            .map(s => {
+              const id = Number(s.replace('term-', ''))
+              if (id > nextId) nextId = id + 1
+              return { id, name: `Terminal ${id}` }
+            })
+
+          if (alive.length > 0 || orphans.length > 0) {
+            const merged = [...alive, ...orphans]
+            return merged
+          }
+          return prev // keep as-is, new sessions will be created on connect
+        })
+      })
+      .catch(() => {})
+  }, [authFetch])
+
+  // Persist on change
+  useEffect(() => {
+    saveTerminals(terminals, activeId)
+  }, [terminals, activeId])
 
   const addTerminal = useCallback(() => {
     const id = nextId++
@@ -86,6 +154,7 @@ export default function TerminalPanel({ token, visible, isFullscreen, onToggleFu
           <Terminal
             key={t.id}
             token={token}
+            sessionId={`term-${t.id}`}
             visible={activeId === t.id && visible}
             terminalTheme={terminalTheme}
           />

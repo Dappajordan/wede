@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
@@ -22,21 +23,87 @@ type WorkspaceProvider interface {
 	Current() string
 }
 
+// session holds a persistent pty that survives websocket reconnects.
+type session struct {
+	id     string
+	ptmx   *os.File
+	cmd    *exec.Cmd
+	mu     sync.Mutex
+	wmu    sync.Mutex      // serializes writes to conn
+	conn   *websocket.Conn // current active connection
+	buf    *ringBuffer     // scrollback buffer for reconnect replay
+	done   chan struct{}
+	closed bool
+}
+
+// writeMessage safely writes to the current connection with write serialization.
+func (s *session) writeMessage(msgType int, data []byte) error {
+	s.mu.Lock()
+	c := s.conn
+	s.mu.Unlock()
+	if c == nil {
+		return nil
+	}
+	s.wmu.Lock()
+	err := c.WriteMessage(msgType, data)
+	s.wmu.Unlock()
+	if err != nil {
+		s.mu.Lock()
+		if s.conn == c {
+			s.conn = nil
+		}
+		s.mu.Unlock()
+	}
+	return err
+}
+
+// ringBuffer stores the last N bytes of terminal output for replay on reconnect.
+type ringBuffer struct {
+	mu   sync.Mutex
+	data []byte
+	max  int
+}
+
+func newRingBuffer(size int) *ringBuffer {
+	return &ringBuffer{data: make([]byte, 0, size), max: size}
+}
+
+func (rb *ringBuffer) Write(p []byte) {
+	rb.mu.Lock()
+	defer rb.mu.Unlock()
+	rb.data = append(rb.data, p...)
+	if len(rb.data) > rb.max {
+		rb.data = rb.data[len(rb.data)-rb.max:]
+	}
+}
+
+func (rb *ringBuffer) Bytes() []byte {
+	rb.mu.Lock()
+	defer rb.mu.Unlock()
+	out := make([]byte, len(rb.data))
+	copy(out, rb.data)
+	return out
+}
+
 type Handler struct {
-	ws WorkspaceProvider
+	ws       WorkspaceProvider
+	mu       sync.Mutex
+	sessions map[string]*session
 }
 
 func New(ws WorkspaceProvider) *Handler {
-	return &Handler{ws: ws}
+	return &Handler{ws: ws, sessions: make(map[string]*session)}
 }
 
-func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("websocket upgrade error:", err)
-		return
+func (h *Handler) getOrCreateSession(id string) (*session, bool, error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if s, ok := h.sessions[id]; ok && !s.closed {
+		log.Printf("[terminal] reattaching to existing session %q (buf=%d bytes)", id, len(s.buf.data))
+		return s, true, nil
 	}
-	defer conn.Close()
+	log.Printf("[terminal] creating new session %q (existing sessions: %d)", id, len(h.sessions))
 
 	shell := os.Getenv("SHELL")
 	if shell == "" {
@@ -59,61 +126,158 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
-		log.Println("pty start error:", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error starting terminal: "+err.Error()))
-		return
+		return nil, false, err
 	}
-	defer ptmx.Close()
 
-	var once sync.Once
-	done := make(chan struct{})
+	s := &session{
+		id:   id,
+		ptmx: ptmx,
+		cmd:  cmd,
+		buf:  newRingBuffer(64 * 1024), // 64KB scrollback
+		done: make(chan struct{}),
+	}
+	h.sessions[id] = s
 
-	// pty -> websocket
+	// pty reader goroutine — reads from pty and sends to current ws connection
 	go func() {
-		buf := make([]byte, 4096)
+		buf := make([]byte, 32768)
 		for {
 			n, err := ptmx.Read(buf)
 			if err != nil {
-				once.Do(func() { close(done) })
+				s.mu.Lock()
+				s.closed = true
+				s.mu.Unlock()
+				close(s.done)
+				h.mu.Lock()
+				delete(h.sessions, id)
+				h.mu.Unlock()
 				return
 			}
-			if err := conn.WriteMessage(websocket.BinaryMessage, buf[:n]); err != nil {
-				once.Do(func() { close(done) })
+			data := make([]byte, n)
+			copy(data, buf[:n])
+			s.buf.Write(data)
+			s.writeMessage(websocket.BinaryMessage, data)
+		}
+	}()
+
+	return s, false, nil
+}
+
+// ListSessions returns active session IDs via HTTP.
+func (h *Handler) ListSessions(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	ids := make([]string, 0, len(h.sessions))
+	for id, s := range h.sessions {
+		if !s.closed {
+			ids = append(ids, id)
+		}
+	}
+	h.mu.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"sessions": ids})
+}
+
+func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("websocket upgrade error:", err)
+		return
+	}
+
+	// Session ID from query param, default to token-based
+	sessionID := r.URL.Query().Get("session")
+	if sessionID == "" {
+		sessionID = r.URL.Query().Get("token")
+	}
+
+	log.Printf("[terminal] ws connect: session=%q", sessionID)
+	s, reconnected, err := h.getOrCreateSession(sessionID)
+	if err != nil {
+		log.Println("pty start error:", err)
+		conn.WriteMessage(websocket.TextMessage, []byte("Error starting terminal: "+err.Error()))
+		conn.Close()
+		return
+	}
+
+	// Detach old connection if any
+	s.mu.Lock()
+	oldConn := s.conn
+	s.conn = conn
+	s.mu.Unlock()
+
+	if oldConn != nil {
+		oldConn.Close()
+	}
+
+	// Replay scrollback buffer on reconnect
+	if reconnected {
+		replay := s.buf.Bytes()
+		if len(replay) > 0 {
+			s.writeMessage(websocket.BinaryMessage, replay)
+		}
+	}
+
+	// Set up a ping/pong keepalive
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+	go func() {
+		ticker := time.NewTicker(25 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				s.mu.Lock()
+				c := s.conn
+				s.mu.Unlock()
+				if c != conn {
+					return
+				}
+				s.wmu.Lock()
+				err := conn.WriteMessage(websocket.PingMessage, nil)
+				s.wmu.Unlock()
+				if err != nil {
+					return
+				}
+			case <-s.done:
 				return
 			}
 		}
 	}()
 
 	// websocket -> pty
-	go func() {
-		for {
-			msgType, msg, err := conn.ReadMessage()
-			if err != nil {
-				once.Do(func() { close(done) })
-				return
+	log.Printf("[terminal] session %q: entering read loop", sessionID)
+	for {
+		msgType, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Printf("[terminal] session %q: read error: %v", sessionID, err)
+			// Client disconnected — detach but keep pty alive
+			s.mu.Lock()
+			if s.conn == conn {
+				s.conn = nil
 			}
-			if msgType == websocket.TextMessage {
-				var resize struct {
-					Type string `json:"type"`
-					Cols int    `json:"cols"`
-					Rows int    `json:"rows"`
-				}
-				if json.Unmarshal(msg, &resize) == nil && resize.Type == "resize" {
-					pty.Setsize(ptmx, &pty.Winsize{
-						Rows: uint16(resize.Rows),
-						Cols: uint16(resize.Cols),
-					})
-					continue
-				}
+			s.mu.Unlock()
+			conn.Close()
+			return
+		}
+		if msgType == websocket.TextMessage {
+			var resize struct {
+				Type string `json:"type"`
+				Cols int    `json:"cols"`
+				Rows int    `json:"rows"`
 			}
-			if _, err := io.WriteString(ptmx, string(msg)); err != nil {
-				once.Do(func() { close(done) })
-				return
+			if json.Unmarshal(msg, &resize) == nil && resize.Type == "resize" {
+				pty.Setsize(s.ptmx, &pty.Winsize{
+					Rows: uint16(resize.Rows),
+					Cols: uint16(resize.Cols),
+				})
+				continue
 			}
 		}
-	}()
-
-	<-done
-	cmd.Process.Kill()
-	cmd.Wait()
+		if _, err := io.WriteString(s.ptmx, string(msg)); err != nil {
+			return
+		}
+	}
 }

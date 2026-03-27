@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -15,14 +17,48 @@ type Handler struct {
 	locked      bool
 	maxAttempts int
 	sessions    map[string]bool
+	dataDir     string
 }
 
 func New(password string) *Handler {
-	return &Handler{
+	home, _ := os.UserHomeDir()
+	dataDir := filepath.Join(home, ".wede")
+	os.MkdirAll(dataDir, 0700)
+
+	h := &Handler{
 		password:    password,
 		maxAttempts: 3,
 		sessions:    make(map[string]bool),
+		dataDir:     dataDir,
 	}
+	h.loadSessions()
+	return h
+}
+
+func (h *Handler) sessionsFile() string {
+	return filepath.Join(h.dataDir, "sessions.json")
+}
+
+func (h *Handler) loadSessions() {
+	data, err := os.ReadFile(h.sessionsFile())
+	if err != nil {
+		return
+	}
+	var tokens []string
+	if json.Unmarshal(data, &tokens) == nil {
+		for _, t := range tokens {
+			h.sessions[t] = true
+		}
+	}
+}
+
+func (h *Handler) saveSessions() {
+	tokens := make([]string, 0, len(h.sessions))
+	for t := range h.sessions {
+		tokens = append(tokens, t)
+	}
+	data, _ := json.Marshal(tokens)
+	os.WriteFile(h.sessionsFile(), data, 0600)
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +69,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		h.mu.Unlock()
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(map[string]any{
-			"error":  "locked",
+			"error":   "locked",
 			"message": "Too many failed attempts. Restart the server to unlock.",
 		})
 		return
@@ -59,7 +95,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			h.locked = true
 			w.WriteHeader(http.StatusForbidden)
 			json.NewEncoder(w).Encode(map[string]any{
-				"error":  "locked",
+				"error":   "locked",
 				"message": "Too many failed attempts. Restart the server to unlock.",
 			})
 			return
@@ -78,6 +114,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	rand.Read(token)
 	sessionToken := hex.EncodeToString(token)
 	h.sessions[sessionToken] = true
+	h.saveSessions()
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"token": sessionToken,

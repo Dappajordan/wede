@@ -100,8 +100,8 @@ function TreeNode({ entry, depth, onSelect, onToggle, expanded, authFetch, onRef
     try {
       const res = await authFetch(`/api/files?path=${encodeURIComponent(entry.path)}`)
       const data = await res.json()
-      setChildren(data)
-    } catch { setChildren([]) }
+      setChildren(Array.isArray(data) ? data : [])
+    } catch { if (!entry.isDir) return; setChildren([]) }
   }, [entry.path, entry.isDir, authFetch])
 
   useEffect(() => {
@@ -169,7 +169,7 @@ function TreeNode({ entry, depth, onSelect, onToggle, expanded, authFetch, onRef
 
       {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={contextItems} onClose={() => setCtx(null)} />}
 
-      {entry.isDir && isOpen && children && (
+      {entry.isDir && isOpen && Array.isArray(children) && children.length > 0 && (
         <div className="relative">
           {children.map((child) => (
             <TreeNode
@@ -188,7 +188,8 @@ function TreeNode({ entry, depth, onSelect, onToggle, expanded, authFetch, onRef
 
 /* ── Main Explorer ── */
 export default function FileExplorer({ authFetch, onFileSelect, selectedPath, workspace }) {
-  const [files, setFiles] = useState([])
+  const [files, _setFiles] = useState([])
+  const setFiles = (v) => _setFiles(Array.isArray(v) ? v : [])
   const [expanded, setExpanded] = useState(new Set())
   const [showNew, setShowNew] = useState(null)
   const [newName, setNewName] = useState('')
@@ -200,7 +201,8 @@ export default function FileExplorer({ authFetch, onFileSelect, selectedPath, wo
   const loadRoot = useCallback(async () => {
     try {
       const res = await authFetch('/api/files?path=')
-      setFiles(await res.json())
+      const data = await res.json()
+      if (Array.isArray(data)) setFiles(data)
     } catch {}
   }, [authFetch])
 
@@ -331,7 +333,7 @@ export default function FileExplorer({ authFetch, onFileSelect, selectedPath, wo
 
       {/* File tree */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-0.5 select-none">
-        {files.map((entry) => (
+        {Array.isArray(files) && files.map((entry) => (
           <TreeNode
             key={entry.path} entry={entry} depth={0}
             onSelect={onFileSelect} onToggle={toggleExpand} expanded={expanded}

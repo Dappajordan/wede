@@ -3,11 +3,18 @@ import { Terminal as XTerminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 
-export default function Terminal({ token, visible, terminalTheme, fontSize = 13 }) {
+export default function Terminal({ token, sessionId, visible, terminalTheme, fontSize = 13 }) {
   const containerRef = useRef(null)
   const termRef = useRef(null)
   const wsRef = useRef(null)
   const fitRef = useRef(null)
+  const reconnectRef = useRef(null)
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   useEffect(() => {
     if (!containerRef.current || !token || termRef.current) return
@@ -32,31 +39,66 @@ export default function Terminal({ token, visible, terminalTheme, fontSize = 13 
 
     setTimeout(() => fitAddon.fit(), 50)
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${protocol}//${window.location.host}/api/terminal?token=${token}`)
-    ws.binaryType = 'arraybuffer'
-    wsRef.current = ws
+    const sid = sessionId || token
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }))
+    function connect(isReconnect) {
+      if (!mountedRef.current) return
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      // In dev mode (Vite on 5173), connect directly to backend on 9090
+      const port = window.location.port
+      const host = (port === '5173' || port === '5174') ? window.location.hostname + ':9090' : window.location.host
+      const ws = new WebSocket(`${protocol}//${host}/api/terminal?token=${token}&session=${sid}`)
+      ws.binaryType = 'arraybuffer'
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        if (isReconnect) {
+          // Clear screen before replay — the server sends scrollback
+          term.clear()
+        }
+        ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }))
+      }
+
+      ws.onmessage = (event) => {
+        if (event.data instanceof ArrayBuffer) {
+          term.write(new Uint8Array(event.data))
+        } else {
+          term.write(event.data)
+        }
+      }
+
+      ws.onerror = () => {}
+
+      ws.onclose = () => {
+        if (!mountedRef.current) return
+        // Only reconnect if this is still the active WebSocket
+        if (wsRef.current !== ws) return
+        wsRef.current = null
+        scheduleReconnect()
+      }
     }
 
-    ws.onmessage = (event) => {
-      const data = event.data instanceof ArrayBuffer
-        ? new TextDecoder().decode(event.data)
-        : event.data
-      term.write(data)
+    let reconnectDelay = 1000
+    function scheduleReconnect() {
+      if (!mountedRef.current) return
+      reconnectRef.current = setTimeout(() => {
+        if (!mountedRef.current) return
+        connect(true)
+        reconnectDelay = Math.min(reconnectDelay * 1.5, 10000)
+      }, reconnectDelay)
     }
 
-    ws.onerror = () => term.write('\r\n\x1b[31mConnection error\x1b[0m\r\n')
-    ws.onclose = () => term.write('\r\n\x1b[33mDisconnected\x1b[0m\r\n')
+    connect(false)
 
     term.onData((data) => {
-      if (ws.readyState === WebSocket.OPEN) ws.send(data)
+      const ws = wsRef.current
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(data)
     })
 
     term.onResize(({ cols, rows }) => {
-      if (ws.readyState === WebSocket.OPEN) {
+      const ws = wsRef.current
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'resize', cols, rows }))
       }
     })
@@ -67,14 +109,16 @@ export default function Terminal({ token, visible, terminalTheme, fontSize = 13 
     ro.observe(containerRef.current)
 
     return () => {
+      mountedRef.current = false
+      if (reconnectRef.current) clearTimeout(reconnectRef.current)
       ro.disconnect()
-      ws.close()
+      if (wsRef.current) wsRef.current.close()
       term.dispose()
       termRef.current = null
       wsRef.current = null
       fitRef.current = null
     }
-  }, [token])
+  }, [token, sessionId])
 
   // Update theme dynamically
   useEffect(() => {
@@ -84,8 +128,13 @@ export default function Terminal({ token, visible, terminalTheme, fontSize = 13 
   }, [terminalTheme])
 
   useEffect(() => {
-    if (visible && fitRef.current) {
-      setTimeout(() => { try { fitRef.current.fit() } catch {} }, 50)
+    if (visible) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try { fitRef.current?.fit() } catch {}
+          try { termRef.current?.focus() } catch {}
+        })
+      })
     }
   }, [visible])
 
